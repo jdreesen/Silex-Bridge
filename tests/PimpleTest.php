@@ -29,13 +29,13 @@ class PimpleTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function closures_should_be_factories()
+    public function factory_should_return_factory_closures()
     {
         $app = new Application();
 
-        $app['foo'] = function () {
+        $app['foo'] = $app->factory(function () {
             return new \stdClass();
-        };
+        });
 
         $this->assertInstanceOf('stdClass', $app['foo']);
         $this->assertNotSame($app['foo'], $app['foo']);
@@ -44,13 +44,13 @@ class PimpleTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function share_should_share_the_closure_result()
+    public function closure_results_should_be_shared()
     {
         $app = new Application();
 
-        $app['foo'] = $app->share(function () {
+        $app['foo'] = function () {
             return new \stdClass();
-        });
+        };
 
         $this->assertInstanceOf('stdClass', $app['foo']);
         $this->assertSame($app['foo'], $app['foo']);
@@ -87,9 +87,9 @@ class PimpleTest extends \PHPUnit_Framework_TestCase
     {
         $app = new Application();
 
-        $app['foo'] = $app->share(function () {
+        $app['foo'] = function () {
             return new \stdClass();
-        });
+        };
         $app['foo'] = $app->extend('foo', function (\stdClass $previous) {
             $previous->hello = 'world';
             return $previous;
