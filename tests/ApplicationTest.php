@@ -3,6 +3,7 @@
 namespace DI\Bridge\Silex\Test;
 
 use DI\Bridge\Silex\Application;
+use DI\Bridge\Silex\Controller\ControllerResolver;
 use DI\Container;
 use DI\ContainerBuilder;
 use Interop\Container\ContainerInterface;
@@ -43,5 +44,17 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
         $app = new Application();
 
         $this->assertInstanceOf(Container::class, $app->getPhpDi());
+    }
+
+
+    /**
+     * @test
+     */
+    public function the_controller_resolver_should_be_registered_as_a_service()
+    {
+        $app = new Application();
+
+        $this->assertInstanceOf(\Closure::class, $app->raw('resolver'));
+        $this->assertInstanceOf(ControllerResolver::class, $app['resolver']);
     }
 }
