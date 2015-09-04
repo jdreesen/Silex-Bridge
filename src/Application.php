@@ -35,7 +35,7 @@ class Application extends \Silex\Application
 
         $containerBuilder = $containerBuilder ?: new ContainerBuilder();
         $containerBuilder->addDefinitions([
-            'Interop\Container\ContainerInterface' => $this->containerInteropProxy,
+            ContainerInterface::class => $this->containerInteropProxy,
         ]);
         $containerBuilder->wrapContainer($this->containerInteropProxy);
         $this->phpdi = $containerBuilder->build();

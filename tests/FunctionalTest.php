@@ -2,6 +2,8 @@
 
 namespace DI\Bridge\Silex\Test;
 
+use DI\Bridge\Silex\Test\Fixture\Controller;
+use DI\Bridge\Silex\Test\Fixture\InvokableController;
 use DI\ContainerBuilder;
 use Interop\Container\ContainerInterface;
 use stdClass;
@@ -31,7 +33,7 @@ class FunctionalTest extends BaseTestCase
     {
         $app = $this->createApplication();
 
-        $app->get('/foo', 'DI\Bridge\Silex\Test\Fixture\InvokableController');
+        $app->get('/foo', InvokableController::class);
 
         $response = $app->handle(Request::create('/foo'));
         $this->assertEquals('Hello world', $response->getContent());
@@ -44,7 +46,7 @@ class FunctionalTest extends BaseTestCase
     {
         $app = $this->createApplication();
 
-        $app->get('/foo', ['DI\Bridge\Silex\Test\Fixture\Controller', 'home']);
+        $app->get('/foo', [Controller::class, 'home']);
 
         $response = $app->handle(Request::create('/foo'));
         $this->assertEquals('Hello world', $response->getContent());
@@ -57,7 +59,7 @@ class FunctionalTest extends BaseTestCase
     {
         $app = $this->createApplication();
 
-        $app->get('/{name}', ['DI\Bridge\Silex\Test\Fixture\Controller', 'hello']);
+        $app->get('/{name}', [Controller::class, 'hello']);
 
         $response = $app->handle(Request::create('/john'));
         $this->assertEquals('Hello john', $response->getContent());

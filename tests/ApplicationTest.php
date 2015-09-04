@@ -3,7 +3,9 @@
 namespace DI\Bridge\Silex\Test;
 
 use DI\Bridge\Silex\Application;
+use DI\Container;
 use DI\ContainerBuilder;
+use Interop\Container\ContainerInterface;
 
 class ApplicationTest extends \PHPUnit_Framework_TestCase
 {
@@ -30,7 +32,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
     {
         $app = new Application();
 
-        $this->assertInstanceOf('Interop\Container\ContainerInterface', $app->getContainer());
+        $this->assertInstanceOf(ContainerInterface::class, $app->getContainer());
     }
 
     /**
@@ -40,6 +42,6 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
     {
         $app = new Application();
 
-        $this->assertInstanceOf('DI\Container', $app->getPhpDi());
+        $this->assertInstanceOf(Container::class, $app->getPhpDi());
     }
 }
