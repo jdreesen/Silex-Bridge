@@ -3,6 +3,12 @@
 namespace DI\Bridge\Silex\Controller;
 
 use DI\InvokerInterface;
+use Interop\Container\ContainerInterface;
+use Invoker\ParameterResolver\AssociativeArrayResolver;
+use Invoker\ParameterResolver\Container\TypeHintContainerResolver;
+use Invoker\ParameterResolver\ParameterResolver;
+use Invoker\ParameterResolver\ResolverChain;
+use Invoker\Reflection\CallableReflection;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
 
@@ -12,12 +18,23 @@ use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
 class ControllerResolver implements ControllerResolverInterface
 {
     /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
      * @var InvokerInterface
      */
     private $invoker;
 
-    public function __construct(InvokerInterface $invoker)
+    /**
+     * @var ParameterResolver|null
+     */
+    private $parameterResolver;
+
+    public function __construct(ContainerInterface $container, InvokerInterface $invoker)
     {
+        $this->container = $container;
         $this->invoker = $invoker;
     }
 
@@ -33,12 +50,7 @@ class ControllerResolver implements ControllerResolverInterface
         }
 
         return function () use ($request, $controller) {
-            $parameters = [
-                'request' => $request,
-            ];
-            $parameters += $request->attributes->all();
-
-            return $this->invoker->call($controller, $parameters);
+            return $this->invoker->call($controller, $this->getArguments($request, $controller));
         };
     }
 
@@ -47,6 +59,40 @@ class ControllerResolver implements ControllerResolverInterface
      */
     public function getArguments(Request $request, $controller)
     {
-        return array();
+        $controllerReflection = CallableReflection::create($controller);
+
+        $resolvedArguments = [];
+        foreach ($controllerReflection->getParameters() as $index => $parameter) {
+            if ($parameter->getClass() && $parameter->getClass()->isInstance($request)) {
+                $resolvedArguments[$index] = $request;
+
+                break;
+            }
+        }
+
+        $arguments = $this->getParameterResolver()->getParameters(
+            $controllerReflection,
+            $request->attributes->all(),
+            $resolvedArguments
+        );
+
+        ksort($arguments);
+
+        return $arguments;
+    }
+
+    /**
+     * @return ParameterResolver
+     */
+    private function getParameterResolver()
+    {
+        if (null === $this->parameterResolver) {
+            $this->parameterResolver = new ResolverChain([
+                new AssociativeArrayResolver,
+                new TypeHintContainerResolver($this->container),
+            ]);
+        }
+
+        return $this->parameterResolver;
     }
 }
