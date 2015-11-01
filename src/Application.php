@@ -46,7 +46,7 @@ class Application extends \Silex\Application
 
         // Override the controller resolver with ours
         $this['resolver'] = function () {
-            return new ControllerResolver($this->containerInteropProxy, $this->phpdi);
+            return new ControllerResolver($this->containerInteropProxy);
         };
     }
 

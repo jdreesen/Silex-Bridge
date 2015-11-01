@@ -95,7 +95,7 @@ class ProvidersTest extends BaseTestCase
         $app = $this->createApplication();
 
         $app->register(new ServiceControllerServiceProvider, [
-            'service.controller' => new Controller(),
+            'service.controller' => new Controller,
         ]);
 
         $app->get('/{name}', 'service.controller:hello');

@@ -2,8 +2,8 @@
 
 namespace DI\Bridge\Silex\Controller;
 
-use DI\InvokerInterface;
 use Interop\Container\ContainerInterface;
+use Invoker\CallableResolver;
 use Invoker\ParameterResolver\AssociativeArrayResolver;
 use Invoker\ParameterResolver\Container\TypeHintContainerResolver;
 use Invoker\ParameterResolver\ParameterResolver;
@@ -23,19 +23,28 @@ class ControllerResolver implements ControllerResolverInterface
     private $container;
 
     /**
-     * @var InvokerInterface
+     * @var CallableResolver
      */
-    private $invoker;
+    private $callableResolver;
 
     /**
-     * @var ParameterResolver|null
+     * @var ParameterResolver
      */
     private $parameterResolver;
 
-    public function __construct(ContainerInterface $container, InvokerInterface $invoker)
+    /**
+     * Constructor.
+     *
+     * @param ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->invoker = $invoker;
+        $this->callableResolver = new CallableResolver($container);
+        $this->parameterResolver = new ResolverChain([
+            new AssociativeArrayResolver,
+            new TypeHintContainerResolver($container),
+        ]);
     }
 
     /**
@@ -43,15 +52,11 @@ class ControllerResolver implements ControllerResolverInterface
      */
     public function getController(Request $request)
     {
-        $controller = $request->attributes->get('_controller');
-
-        if (! $controller) {
-            throw new \LogicException('No controller can be found for this request');
+        if (! $controller = $request->attributes->get('_controller')) {
+            throw new \LogicException('No controller could be found for this request.');
         }
 
-        return function () use ($request, $controller) {
-            return $this->invoker->call($controller, $this->getArguments($request, $controller));
-        };
+        return $this->callableResolver->resolve($controller);
     }
 
     /**
@@ -70,7 +75,7 @@ class ControllerResolver implements ControllerResolverInterface
             }
         }
 
-        $arguments = $this->getParameterResolver()->getParameters(
+        $arguments = $this->parameterResolver->getParameters(
             $controllerReflection,
             $request->attributes->all(),
             $resolvedArguments
@@ -79,20 +84,5 @@ class ControllerResolver implements ControllerResolverInterface
         ksort($arguments);
 
         return $arguments;
-    }
-
-    /**
-     * @return ParameterResolver
-     */
-    private function getParameterResolver()
-    {
-        if (null === $this->parameterResolver) {
-            $this->parameterResolver = new ResolverChain([
-                new AssociativeArrayResolver,
-                new TypeHintContainerResolver($this->container),
-            ]);
-        }
-
-        return $this->parameterResolver;
     }
 }
