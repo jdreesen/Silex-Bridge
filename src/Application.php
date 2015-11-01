@@ -7,6 +7,10 @@ use DI\Bridge\Silex\Controller\ControllerResolver;
 use DI\Container;
 use DI\ContainerBuilder;
 use Interop\Container\ContainerInterface;
+use Invoker\CallableResolver;
+use Invoker\ParameterResolver\AssociativeArrayResolver;
+use Invoker\ParameterResolver\Container\TypeHintContainerResolver;
+use Invoker\ParameterResolver\ResolverChain;
 
 /**
  * Replacement for the Silex Application class to use PHP-DI instead of Pimple.
@@ -46,7 +50,13 @@ class Application extends \Silex\Application
 
         // Override the controller resolver with ours
         $this['resolver'] = function () {
-            return new ControllerResolver($this->containerInteropProxy);
+            return new ControllerResolver(
+                new CallableResolver($this->containerInteropProxy),
+                new ResolverChain([
+                    new AssociativeArrayResolver,
+                    new TypeHintContainerResolver($this->containerInteropProxy),
+                ])
+            );
         };
     }
 

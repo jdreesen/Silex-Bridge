@@ -2,14 +2,9 @@
 
 namespace DI\Bridge\Silex\Controller;
 
-use Interop\Container\ContainerInterface;
 use Invoker\CallableResolver;
 use Invoker\Exception\NotCallableException;
-use Invoker\ParameterResolver\AssociativeArrayResolver;
-use Invoker\ParameterResolver\Container\TypeHintContainerResolver;
-use Invoker\ParameterResolver\DefaultValueResolver;
 use Invoker\ParameterResolver\ParameterResolver;
-use Invoker\ParameterResolver\ResolverChain;
 use Invoker\Reflection\CallableReflection;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
@@ -19,11 +14,6 @@ use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
  */
 class ControllerResolver implements ControllerResolverInterface
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
-
     /**
      * @var CallableResolver
      */
@@ -37,16 +27,13 @@ class ControllerResolver implements ControllerResolverInterface
     /**
      * Constructor.
      *
-     * @param ContainerInterface $container
+     * @param CallableResolver  $callableResolver
+     * @param ParameterResolver $parameterResolver
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(CallableResolver $callableResolver, ParameterResolver $parameterResolver)
     {
-        $this->container = $container;
-        $this->callableResolver = new CallableResolver($container);
-        $this->parameterResolver = new ResolverChain([
-            new AssociativeArrayResolver,
-            new TypeHintContainerResolver($container),
-        ]);
+        $this->callableResolver = $callableResolver;
+        $this->parameterResolver = $parameterResolver;
     }
 
     /**
@@ -78,9 +65,10 @@ class ControllerResolver implements ControllerResolverInterface
     public function getArguments(Request $request, $controller)
     {
         $controllerReflection = CallableReflection::create($controller);
-
+        $controllerParameters = $controllerReflection->getParameters();
         $resolvedArguments = [];
-        foreach ($controllerReflection->getParameters() as $index => $parameter) {
+
+        foreach ($controllerParameters as $index => $parameter) {
             if ($parameter->getClass() && $parameter->getClass()->isInstance($request)) {
                 $resolvedArguments[$index] = $request;
 
@@ -95,6 +83,18 @@ class ControllerResolver implements ControllerResolverInterface
         );
 
         ksort($arguments);
+
+        // Check if all parameters are resolved
+        $diff = array_diff_key($controllerParameters, $arguments);
+        if (0 < count($diff)) {
+            /** @var \ReflectionParameter $parameter */
+            $parameter = reset($diff);
+            throw new \RuntimeException(sprintf(
+                'Controller "%s" requires that you provide a value for the "$%s" argument.',
+                $controllerReflection->getName(),
+                $parameter->getName()
+            ));
+        }
 
         return $arguments;
     }
