@@ -4,8 +4,10 @@ namespace DI\Bridge\Silex\Controller;
 
 use Interop\Container\ContainerInterface;
 use Invoker\CallableResolver;
+use Invoker\Exception\NotCallableException;
 use Invoker\ParameterResolver\AssociativeArrayResolver;
 use Invoker\ParameterResolver\Container\TypeHintContainerResolver;
+use Invoker\ParameterResolver\DefaultValueResolver;
 use Invoker\ParameterResolver\ParameterResolver;
 use Invoker\ParameterResolver\ResolverChain;
 use Invoker\Reflection\CallableReflection;
@@ -53,10 +55,21 @@ class ControllerResolver implements ControllerResolverInterface
     public function getController(Request $request)
     {
         if (! $controller = $request->attributes->get('_controller')) {
-            throw new \LogicException('No controller could be found for this request.');
+            throw new \LogicException(sprintf(
+                'Controller for URI "%s" could not be found because the "_controller" parameter is missing.',
+                $request->getPathInfo()
+            ));
         }
 
-        return $this->callableResolver->resolve($controller);
+        try {
+            return $this->callableResolver->resolve($controller);
+        } catch (NotCallableException $e) {
+            throw new \InvalidArgumentException(sprintf(
+                'Controller for URI "%s" is not callable: %s',
+                $request->getPathInfo(),
+                $e->getMessage()
+            ));
+        }
     }
 
     /**
