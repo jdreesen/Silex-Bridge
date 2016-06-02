@@ -4,27 +4,24 @@ namespace DI\Bridge\Silex;
 
 use DI\Bridge\Silex\Container\ContainerInteropProxy;
 use DI\Bridge\Silex\Controller\ControllerResolver;
-use DI\Bridge\Silex\MiddlewareListener;
-use DI\Bridge\Silex\ConverterListener;
-use Silex\EventListener\LocaleListener;
-use Silex\EventListener\StringToResponseListener;
-use Silex\LazyUrlMatcher;
-use Symfony\Component\HttpKernel\Kernel;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpKernel\Event\PostResponseEvent;
-use Symfony\Component\HttpKernel\EventListener\ResponseListener;
-use Symfony\Component\HttpKernel\EventListener\RouterListener;
 use DI\Container;
 use DI\ContainerBuilder;
 use Interop\Container\ContainerInterface;
 use Invoker\CallableResolver;
-use Invoker\Reflection\CallableReflection;
 use Invoker\ParameterResolver\AssociativeArrayResolver;
 use Invoker\ParameterResolver\Container\TypeHintContainerResolver;
 use Invoker\ParameterResolver\ResolverChain;
+use Silex\EventListener\LocaleListener;
+use Silex\EventListener\StringToResponseListener;
+use Silex\LazyUrlMatcher;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\PostResponseEvent;
+use Symfony\Component\HttpKernel\EventListener\ResponseListener;
+use Symfony\Component\HttpKernel\EventListener\RouterListener;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\Kernel;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Replacement for the Silex Application class to use PHP-DI instead of Pimple.
@@ -59,8 +56,8 @@ class Application extends \Silex\Application
         $containerBuilder = $containerBuilder ?: new ContainerBuilder();
         $containerBuilder->addDefinitions([
             'Interop\Container\ContainerInterface' => $this->containerInteropProxy,
-            'Silex\Application' => $this,
-            get_class($this) => $this,
+            'Silex\Application'                    => $this,
+            get_class($this)                       => $this,
         ]);
         $containerBuilder->wrapContainer($this->containerInteropProxy);
         $this->phpdi = $containerBuilder->build();
@@ -77,7 +74,7 @@ class Application extends \Silex\Application
             return new ControllerResolver(
                 $this['phpdi.callable_resolver'],
                 new ResolverChain([
-                    new AssociativeArrayResolver,
+                    new AssociativeArrayResolver(),
                     new TypeHintContainerResolver($this->containerInteropProxy),
                 ])
             );
@@ -93,7 +90,7 @@ class Application extends \Silex\Application
 
         // Override the dispatcher with ours to use our event listeners
         $this['dispatcher'] = $this->share(function () {
-            /**
+            /*
              * @var EventDispatcherInterface
              */
             $dispatcher = new $this['dispatcher_class']();
@@ -124,6 +121,7 @@ class Application extends \Silex\Application
         if (parent::offsetExists($id)) {
             return parent::offsetGet($id);
         }
+
         return $this->phpdi->get($id);
     }
 
@@ -168,7 +166,6 @@ class Application extends \Silex\Application
             if ($ret instanceof Response) {
                 $event->setResponse($ret);
             }
-
         }, $priority);
     }
 
@@ -184,7 +181,7 @@ class Application extends \Silex\Application
             $middleware = $this['callback_resolver']->resolveCallback($callback);
             $ret = $this->callbackInvoker->call($middleware, [
                 // type hints
-                'Symfony\Component\HttpFoundation\Request' => $request,
+                'Symfony\Component\HttpFoundation\Request'  => $request,
                 'Symfony\Component\HttpFoundation\Response' => $response,
                 // Silex' default parameter order
                 0 => $request,
@@ -197,20 +194,18 @@ class Application extends \Silex\Application
             } elseif (null !== $ret) {
                 throw new \RuntimeException('An after middleware returned an invalid response value. Must return null or an instance of Response.');
             }
-
         }, $priority);
     }
 
     public function finish($callback, $priority = 0)
     {
         $this->on(KernelEvents::TERMINATE, function (PostResponseEvent $event) use ($callback) {
-
             $request = $event->getRequest();
             $response = $event->getResponse();
             $middleware = $this['callback_resolver']->resolveCallback($callback);
             $ret = $this->callbackInvoker->call($middleware, [
                 // type hints
-                'Symfony\Component\HttpFoundation\Request' => $request,
+                'Symfony\Component\HttpFoundation\Request'  => $request,
                 'Symfony\Component\HttpFoundation\Response' => $response,
                 // Silex' default parameter order
                 0 => $request,
@@ -223,7 +218,6 @@ class Application extends \Silex\Application
             } elseif (null !== $ret) {
                 throw new \RuntimeException('An after middleware returned an invalid response value. Must return null or an instance of Response.');
             }
-
         }, $priority);
     }
 }

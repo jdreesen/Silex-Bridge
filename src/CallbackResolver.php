@@ -6,7 +6,7 @@ use Invoker\CallableResolver;
 use Invoker\Exception\NotCallableException;
 
 /**
- * This alternative resolver uses the generic Invoker to support PHP-DI's extended callable syntax
+ * This alternative resolver uses the generic Invoker to support PHP-DI's extended callable syntax.
  */
 class CallbackResolver extends \Silex\CallbackResolver
 {
@@ -23,6 +23,7 @@ class CallbackResolver extends \Silex\CallbackResolver
 
     /**
      * @param string $name
+     *
      * @return array|callable
      */
     public function convertCallback($name)
@@ -42,6 +43,7 @@ class CallbackResolver extends \Silex\CallbackResolver
 
     /**
      * @param string|callable $name
+     *
      * @return callable
      */
     public function resolveCallback($name)

@@ -2,10 +2,9 @@
 
 namespace DI\Bridge\Silex\Test;
 
-use DI\ContainerBuilder;
-
-use stdClass;
 use DI\Bridge\Silex\Application;
+use DI\ContainerBuilder;
+use stdClass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,11 +15,12 @@ class MiddlewareTest extends BaseTestCase
      */
     public function should_allow_arbitrary_injection_in_middleware()
     {
-        $builder = new ContainerBuilder;
+        $builder = new ContainerBuilder();
         $builder->addDefinitions([
             'stdClass' => function () {
-                $service = new stdClass;
+                $service = new stdClass();
                 $service->foo = 'bar';
+
                 return $service;
             },
         ]);
@@ -47,7 +47,7 @@ class MiddlewareTest extends BaseTestCase
         };
 
         $handler = function (Request $r) {
-            return 'Hello ' . $r->get('name');
+            return 'Hello '.$r->get('name');
         };
 
         // route middleware
@@ -85,7 +85,7 @@ class MiddlewareTest extends BaseTestCase
         };
 
         $handler = function (Request $req) {
-            return 'Hello ' . $req->get('name');
+            return 'Hello '.$req->get('name');
         };
 
         // route middleware

@@ -6,6 +6,6 @@ class InvokableViewListener
 {
     public function __invoke($controllerResult)
     {
-        return $controllerResult . ' from mars';
+        return $controllerResult.' from mars';
     }
 }

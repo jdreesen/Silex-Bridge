@@ -2,10 +2,9 @@
 
 namespace DI\Bridge\Silex;
 
-use DI\Bridge\Silex\Application;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
 /**
  * Replacement for the Silex MiddlewareListener to allow arbitrary injection into middleware functions.
@@ -38,7 +37,6 @@ class MiddlewareListener extends \Silex\EventListener\MiddlewareListener
         }
 
         foreach ((array) $route->getOption('_before_middlewares') as $callback) {
-
             $middleware = $this->app['callback_resolver']->resolveCallback($callback);
             $ret = $this->callbackInvoker->call($middleware, [
                 // type hints
@@ -66,11 +64,10 @@ class MiddlewareListener extends \Silex\EventListener\MiddlewareListener
         }
 
         foreach ((array) $route->getOption('_after_middlewares') as $callback) {
-
             $middleware = $this->app['callback_resolver']->resolveCallback($callback);
             $ret = $this->callbackInvoker->call($middleware, [
                 // type hints
-                'Symfony\Component\HttpFoundation\Request' => $request,
+                'Symfony\Component\HttpFoundation\Request'  => $request,
                 'Symfony\Component\HttpFoundation\Response' => $response,
                 // Silex' default parameter order
                 0 => $request,
