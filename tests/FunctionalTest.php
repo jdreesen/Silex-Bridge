@@ -71,7 +71,7 @@ class FunctionalTest extends BaseTestCase
         $app = $this->createApplication();
 
         $app->get('/', function ($request) {
-            return 'Hello ' . $request->get('name');
+            return 'Hello '.$request->get('name');
         });
 
         $response = $app->handle(Request::create('/?name=john'));
@@ -83,11 +83,12 @@ class FunctionalTest extends BaseTestCase
      */
     public function should_pass_phpdi_service_based_on_type_hint()
     {
-        $builder = new ContainerBuilder;
+        $builder = new ContainerBuilder();
         $builder->addDefinitions([
             'stdClass' => function () {
-                $service = new stdClass;
+                $service = new stdClass();
                 $service->foo = 'bar';
+
                 return $service;
             },
         ]);
@@ -109,7 +110,7 @@ class FunctionalTest extends BaseTestCase
     {
         $app = $this->createApplication();
 
-        $service = new stdClass;
+        $service = new stdClass();
         $service->foo = 'bar';
         $app['stdClass'] = $service;
 
@@ -126,7 +127,7 @@ class FunctionalTest extends BaseTestCase
      */
     public function should_pass_the_container_based_on_type_hint()
     {
-        $builder = new ContainerBuilder;
+        $builder = new ContainerBuilder();
         $builder->addDefinitions([
             'foo' => 'bar',
         ]);
@@ -182,7 +183,7 @@ class FunctionalTest extends BaseTestCase
         $app = $this->createApplication();
 
         $app->get('/', function (Request $r) {
-            return 'Hello ' . $r->get('name');
+            return 'Hello '.$r->get('name');
         });
 
         $response = $app->handle(Request::create('/?name=john'));

@@ -21,7 +21,7 @@ class ProvidersTest extends BaseTestCase
      */
     public function test_twig()
     {
-        $builder = new ContainerBuilder;
+        $builder = new ContainerBuilder();
         $builder->addDefinitions([
             // Create an alias so that we can inject with the type-hint
             'Twig_Environment' => \DI\get('twig'),
@@ -29,7 +29,7 @@ class ProvidersTest extends BaseTestCase
         $app = $this->createApplication($builder);
 
         $app->register(new TwigServiceProvider(), [
-            'twig.path' => __DIR__ . '/Fixture/views',
+            'twig.path' => __DIR__.'/Fixture/views',
         ]);
 
         $app->get('/', function (\Twig_Environment $twig) {
@@ -46,7 +46,7 @@ class ProvidersTest extends BaseTestCase
      */
     public function test_url_generator()
     {
-        $builder = new ContainerBuilder;
+        $builder = new ContainerBuilder();
         $builder->addDefinitions([
             // Create an alias so that we can inject with the type-hint
             'Symfony\Component\Routing\Generator\UrlGenerator' => \DI\get('url_generator'),
@@ -69,22 +69,23 @@ class ProvidersTest extends BaseTestCase
      */
     public function test_mailer()
     {
-        $builder = new ContainerBuilder;
+        $builder = new ContainerBuilder();
         $builder->addDefinitions([
             // Create an alias so that we can inject with the type-hint
             'Swift_Mailer' => \DI\get('mailer'),
         ]);
         $app = $this->createApplication($builder);
 
-        $app->register(new SwiftmailerServiceProvider, [
+        $app->register(new SwiftmailerServiceProvider(), [
             'swiftmailer.transport' => new Swift_Transport_NullTransport(
-                new Swift_Events_SimpleEventDispatcher
+                new Swift_Events_SimpleEventDispatcher()
             ),
         ]);
 
         $app->get('/', function (Swift_Mailer $mailer) {
             $message = \Swift_Message::newInstance();
             $mailer->send($message);
+
             return 'OK';
         });
 
@@ -100,8 +101,8 @@ class ProvidersTest extends BaseTestCase
     {
         $app = $this->createApplication();
 
-        $app->register(new ServiceControllerServiceProvider, [
-            'service.controller' => new Controller,
+        $app->register(new ServiceControllerServiceProvider(), [
+            'service.controller' => new Controller(),
         ]);
 
         $app->get('/{name}', 'service.controller:hello');

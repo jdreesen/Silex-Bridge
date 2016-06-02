@@ -63,7 +63,8 @@ class PimpleTest extends \PHPUnit_Framework_TestCase
     {
         $app = new Application();
 
-        $app['foo'] = $app->protect(function () {});
+        $app['foo'] = $app->protect(function () {
+        });
 
         $this->assertInstanceOf('Closure', $app['foo']);
     }
@@ -75,7 +76,8 @@ class PimpleTest extends \PHPUnit_Framework_TestCase
     {
         $app = new Application();
 
-        $app['foo'] = function () {};
+        $app['foo'] = function () {
+        };
 
         $this->assertInstanceOf('Closure', $app->raw('foo'));
     }
@@ -92,6 +94,7 @@ class PimpleTest extends \PHPUnit_Framework_TestCase
         });
         $app['foo'] = $app->extend('foo', function (\stdClass $previous) {
             $previous->hello = 'world';
+
             return $previous;
         });
 

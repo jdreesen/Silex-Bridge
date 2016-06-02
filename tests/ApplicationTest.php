@@ -12,7 +12,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
      */
     public function can_take_our_own_container_builder()
     {
-        $builder = new ContainerBuilder;
+        $builder = new ContainerBuilder();
         $builder->addDefinitions([
             'foo' => 'bar',
         ]);

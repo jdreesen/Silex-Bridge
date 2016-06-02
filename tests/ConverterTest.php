@@ -2,12 +2,10 @@
 
 namespace DI\Bridge\Silex\Test;
 
-use DI\ContainerBuilder;
-
-use stdClass;
 use DI\Bridge\Silex\Application;
+use DI\ContainerBuilder;
+use stdClass;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class ConverterTest extends BaseTestCase
 {
@@ -16,11 +14,12 @@ class ConverterTest extends BaseTestCase
      */
     public function should_allow_arbitrary_injection_in_converter()
     {
-        $builder = new ContainerBuilder;
+        $builder = new ContainerBuilder();
         $builder->addDefinitions([
             'stdClass' => function () {
-                $service = new stdClass;
+                $service = new stdClass();
                 $service->foo = 'bar';
+
                 return $service;
             },
         ]);
@@ -36,11 +35,12 @@ class ConverterTest extends BaseTestCase
             $this->assertInstanceOf('stdClass', $someService);
             $this->assertAttributeEquals('bar', 'foo', $someService);
             $this->assertEquals($user, 'john');
+
             return ['name' => $user];
         };
 
         $handler = function (Request $r, array $user) {
-            return 'Hello ' . $user['name'];
+            return 'Hello '.$user['name'];
         };
 
         $application->get('/{user}', $handler)->convert('user', $converter);
@@ -62,11 +62,12 @@ class ConverterTest extends BaseTestCase
             $this->assertEquals($user, 'john');
             $this->assertInstanceOf('\Symfony\Component\HttpFoundation\Request', $req);
             $this->assertEquals('param', $req->query->get('some'));
+
             return ['name' => $user];
         };
 
         $handler = function (Request $r, array $user) {
-            return 'Hello ' . $user['name'];
+            return 'Hello '.$user['name'];
         };
 
         $application->get('/{user}', $handler)->convert('user', $converter);

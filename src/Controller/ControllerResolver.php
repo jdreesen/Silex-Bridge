@@ -41,7 +41,7 @@ class ControllerResolver implements ControllerResolverInterface
      */
     public function getController(Request $request)
     {
-        if (! $controller = $request->attributes->get('_controller')) {
+        if (!$controller = $request->attributes->get('_controller')) {
             throw new \LogicException(sprintf(
                 'Controller for URI "%s" could not be found because the "_controller" parameter is missing.',
                 $request->getPathInfo()
